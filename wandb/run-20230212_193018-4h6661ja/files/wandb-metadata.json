@@ -1,0 +1,144 @@
+{
+    "os": "Linux-5.19.0-29-generic-x86_64-with-glibc2.36",
+    "python": "3.10.7",
+    "heartbeatAt": "2023-02-12T14:00:20.402029",
+    "startedAt": "2023-02-12T14:00:18.542400",
+    "docker": null,
+    "cuda": null,
+    "args": null,
+    "state": "running",
+    "program": "train-jvsc-dcef3e6e-ab5c-4721-8044-190c7661ea24f47ec5fd-d273-420b-b845-78b0779e6240.ipynb",
+    "root": "/home/bersi/Documents/CS6910 Assignments/CS6910-Assignment1",
+    "git": {
+        "remote": "git@github.com:bersilin-robert1609/cs6910_assignment1.git",
+        "commit": "9672b71dbc93cab367a59a2749d84c527477875e"
+    },
+    "email": "bersilinrobert1609@gmail.com",
+    "host": "bersi",
+    "username": "bersi",
+    "executable": "/bin/python3",
+    "cpu_count": 14,
+    "cpu_count_logical": 20,
+    "cpu_freq": {
+        "current": 2419.5333,
+        "min": 400.0,
+        "max": 3860.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2943.725,
+            "min": 400.0,
+            "max": 4100.0
+        },
+        {
+            "current": 4100.018,
+            "min": 400.0,
+            "max": 4100.0
+        },
+        {
+            "current": 2989.701,
+            "min": 400.0,
+            "max": 4100.0
+        },
+        {
+            "current": 1808.032,
+            "min": 400.0,
+            "max": 4100.0
+        },
+        {
+            "current": 3471.726,
+            "min": 400.0,
+            "max": 4100.0
+        },
+        {
+            "current": 2700.0,
+            "min": 400.0,
+            "max": 4100.0
+        },
+        {
+            "current": 3927.234,
+            "min": 400.0,
+            "max": 4100.0
+        },
+        {
+            "current": 3221.822,
+            "min": 400.0,
+            "max": 4100.0
+        },
+        {
+            "current": 3565.619,
+            "min": 400.0,
+            "max": 4100.0
+        },
+        {
+            "current": 3149.658,
+            "min": 400.0,
+            "max": 4100.0
+        },
+        {
+            "current": 3677.02,
+            "min": 400.0,
+            "max": 4100.0
+        },
+        {
+            "current": 2700.0,
+            "min": 400.0,
+            "max": 4100.0
+        },
+        {
+            "current": 1660.228,
+            "min": 400.0,
+            "max": 3500.0
+        },
+        {
+            "current": 3160.403,
+            "min": 400.0,
+            "max": 3500.0
+        },
+        {
+            "current": 3176.512,
+            "min": 400.0,
+            "max": 3500.0
+        },
+        {
+            "current": 3313.103,
+            "min": 400.0,
+            "max": 3500.0
+        },
+        {
+            "current": 1848.007,
+            "min": 400.0,
+            "max": 3500.0
+        },
+        {
+            "current": 399.817,
+            "min": 400.0,
+            "max": 3500.0
+        },
+        {
+            "current": 2435.046,
+            "min": 400.0,
+            "max": 3500.0
+        },
+        {
+            "current": 2700.0,
+            "min": 400.0,
+            "max": 3500.0
+        }
+    ],
+    "disk": {
+        "total": 195.8017349243164,
+        "used": 42.04994201660156
+    },
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+    "gpu_count": 1,
+    "gpu_devices": [
+        {
+            "name": "NVIDIA GeForce RTX 3060 Laptop GPU",
+            "memory_total": 6442450944
+        }
+    ],
+    "memory": {
+        "total": 15.299293518066406
+    }
+}

@@ -1,0 +1,91 @@
+2023-02-12 19:27:02,750 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Configure stats pid to 36932
+2023-02-12 19:27:02,751 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Loading settings from /home/bersi/.config/wandb/settings
+2023-02-12 19:27:02,751 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Loading settings from /home/bersi/Documents/CS6910 Assignments/CS6910-Assignment1/wandb/settings
+2023-02-12 19:27:02,751 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Loading settings from environment variables: {'_require_service': 'True'}
+2023-02-12 19:27:02,751 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Inferring run settings from compute environment: {'program': '<python with no main file>'}
+2023-02-12 19:27:02,751 INFO    MainThread:36932 [wandb_init.py:_log_setup():492] Logging user logs to /home/bersi/Documents/CS6910 Assignments/CS6910-Assignment1/wandb/run-20230212_192702-huk7qoki/logs/debug.log
+2023-02-12 19:27:02,751 INFO    MainThread:36932 [wandb_init.py:_log_setup():493] Logging internal logs to /home/bersi/Documents/CS6910 Assignments/CS6910-Assignment1/wandb/run-20230212_192702-huk7qoki/logs/debug-internal.log
+2023-02-12 19:27:02,751 INFO    MainThread:36932 [wandb_init.py:_jupyter_setup():438] configuring jupyter hooks <wandb.sdk.wandb_init._WandbInit object at 0x7fdcd7622bf0>
+2023-02-12 19:27:02,752 INFO    MainThread:36932 [wandb_init.py:init():532] calling init triggers
+2023-02-12 19:27:02,752 INFO    MainThread:36932 [wandb_init.py:init():538] wandb.init called with sweep_config: {}
+config: {}
+2023-02-12 19:27:02,752 INFO    MainThread:36932 [wandb_init.py:init():588] starting backend
+2023-02-12 19:27:02,752 INFO    MainThread:36932 [wandb_init.py:init():592] setting up manager
+2023-02-12 19:27:02,768 INFO    MainThread:36932 [backend.py:_multiprocessing_setup():106] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2023-02-12 19:27:02,773 INFO    MainThread:36932 [wandb_init.py:init():599] backend started and connected
+2023-02-12 19:27:02,779 INFO    MainThread:36932 [wandb_run.py:_label_probe_notebook():1203] probe notebook
+2023-02-12 19:27:02,779 INFO    MainThread:36932 [wandb_run.py:_label_probe_notebook():1213] Unable to probe notebook: 'NoneType' object has no attribute 'get'
+2023-02-12 19:27:02,780 INFO    MainThread:36932 [wandb_init.py:init():687] updated telemetry
+2023-02-12 19:27:02,783 INFO    MainThread:36932 [wandb_init.py:init():727] communicating run to backend with 60.0 second timeout
+2023-02-12 19:27:05,822 WARNING MsgRouterThr:36932 [router.py:message_loop():77] message_loop has been closed
+2023-02-12 19:27:12,896 ERROR   MainThread:36932 [wandb_init.py:init():1160] error
+Traceback (most recent call last):
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1133, in init
+    run = wi.init()
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 730, in init
+    result = run_init_handle.wait(
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/lib/mailbox.py", line 271, in wait
+    raise MailboxError("transport failed")
+wandb.errors.MailboxError: transport failed
+2023-02-12 19:29:27,128 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Configure stats pid to 36932
+2023-02-12 19:29:27,128 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Loading settings from /home/bersi/.config/wandb/settings
+2023-02-12 19:29:27,128 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Loading settings from /home/bersi/Documents/CS6910 Assignments/CS6910-Assignment1/wandb/settings
+2023-02-12 19:29:27,128 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Loading settings from environment variables: {'_require_service': 'True'}
+2023-02-12 19:29:27,128 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Inferring run settings from compute environment: {'program': '<python with no main file>'}
+2023-02-12 19:29:27,128 INFO    MainThread:36932 [wandb_init.py:_log_setup():492] Logging user logs to /home/bersi/Documents/CS6910 Assignments/CS6910-Assignment1/wandb/run-20230212_192927-f7vfns2m/logs/debug.log
+2023-02-12 19:29:27,128 INFO    MainThread:36932 [wandb_init.py:_log_setup():493] Logging internal logs to /home/bersi/Documents/CS6910 Assignments/CS6910-Assignment1/wandb/run-20230212_192927-f7vfns2m/logs/debug-internal.log
+2023-02-12 19:29:27,128 INFO    MainThread:36932 [wandb_init.py:init():532] calling init triggers
+2023-02-12 19:29:27,128 INFO    MainThread:36932 [wandb_init.py:init():538] wandb.init called with sweep_config: {}
+config: {}
+2023-02-12 19:29:27,128 INFO    MainThread:36932 [wandb_init.py:init():588] starting backend
+2023-02-12 19:29:27,128 INFO    MainThread:36932 [wandb_init.py:init():592] setting up manager
+2023-02-12 19:29:27,139 ERROR   MainThread:36932 [wandb_init.py:init():1160] error
+Traceback (most recent call last):
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1133, in init
+    run = wi.init()
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 593, in init
+    manager._inform_init(settings=self.settings, run_id=self.settings.run_id)
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/wandb_manager.py", line 174, in _inform_init
+    svc_iface._svc_inform_init(settings=settings, run_id=run_id)
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/service/service_sock.py", line 38, in _svc_inform_init
+    self._sock_client.send(inform_init=inform_init)
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/lib/sock_client.py", line 211, in send
+    self.send_server_request(server_req)
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/lib/sock_client.py", line 155, in send_server_request
+    self._send_message(msg)
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/lib/sock_client.py", line 152, in _send_message
+    self._sendall_with_error_handle(header + data)
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/lib/sock_client.py", line 130, in _sendall_with_error_handle
+    sent = self._sock.send(data)
+BrokenPipeError: [Errno 32] Broken pipe
+2023-02-12 19:29:47,294 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Configure stats pid to 36932
+2023-02-12 19:29:47,294 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Loading settings from /home/bersi/.config/wandb/settings
+2023-02-12 19:29:47,294 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Loading settings from /home/bersi/Documents/CS6910 Assignments/CS6910-Assignment1/wandb/settings
+2023-02-12 19:29:47,295 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Loading settings from environment variables: {'_require_service': 'True'}
+2023-02-12 19:29:47,295 INFO    MainThread:36932 [wandb_setup.py:_flush():68] Inferring run settings from compute environment: {'program': '<python with no main file>'}
+2023-02-12 19:29:47,295 INFO    MainThread:36932 [wandb_init.py:_log_setup():492] Logging user logs to /home/bersi/Documents/CS6910 Assignments/CS6910-Assignment1/wandb/run-20230212_192947-pdv1j9ux/logs/debug.log
+2023-02-12 19:29:47,295 INFO    MainThread:36932 [wandb_init.py:_log_setup():493] Logging internal logs to /home/bersi/Documents/CS6910 Assignments/CS6910-Assignment1/wandb/run-20230212_192947-pdv1j9ux/logs/debug-internal.log
+2023-02-12 19:29:47,295 INFO    MainThread:36932 [wandb_init.py:init():532] calling init triggers
+2023-02-12 19:29:47,295 INFO    MainThread:36932 [wandb_init.py:init():538] wandb.init called with sweep_config: {}
+config: {}
+2023-02-12 19:29:47,295 INFO    MainThread:36932 [wandb_init.py:init():588] starting backend
+2023-02-12 19:29:47,295 INFO    MainThread:36932 [wandb_init.py:init():592] setting up manager
+2023-02-12 19:29:47,299 ERROR   MainThread:36932 [wandb_init.py:init():1160] error
+Traceback (most recent call last):
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1133, in init
+    run = wi.init()
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 593, in init
+    manager._inform_init(settings=self.settings, run_id=self.settings.run_id)
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/wandb_manager.py", line 174, in _inform_init
+    svc_iface._svc_inform_init(settings=settings, run_id=run_id)
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/service/service_sock.py", line 38, in _svc_inform_init
+    self._sock_client.send(inform_init=inform_init)
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/lib/sock_client.py", line 211, in send
+    self.send_server_request(server_req)
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/lib/sock_client.py", line 155, in send_server_request
+    self._send_message(msg)
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/lib/sock_client.py", line 152, in _send_message
+    self._sendall_with_error_handle(header + data)
+  File "/home/bersi/.local/lib/python3.10/site-packages/wandb/sdk/lib/sock_client.py", line 130, in _sendall_with_error_handle
+    sent = self._sock.send(data)
+BrokenPipeError: [Errno 32] Broken pipe
