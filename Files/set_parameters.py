@@ -22,7 +22,7 @@
 # HIDDEN_SIZE - the size of the hidden layers
 # ACTIVATION - the activation function to use
 
-import settings
+import Files.settings as settings
 
 def set_paramaters(arguments_array):
     # Description: This function sets the parameters from the arguments array
