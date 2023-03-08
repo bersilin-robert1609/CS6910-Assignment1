@@ -1,17 +1,28 @@
+
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-import sklearn as sk
 from sklearn.model_selection import train_test_split
-
 from keras.datasets import fashion_mnist
+import wandb
 
-# Load the data
-(x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
-
-# Normalize the data
-x_train = x_train / 255.0
-x_test = x_test / 255.0
+WANDB_PROJECT = "myprojectname"
+WANDB_ENTITY = "myname"
+DATASET = "fashion_mnist"
+EPOCHS = 10
+BATCH_SIZE = 32
+LOSS = "cross_entropy"
+OPTIMIZER = "sgd"
+LEARNING_RATE = 0.001
+MOMENTUM = 0.8
+BETA = 0.5
+BETA1 = 0.9
+BETA2 = 0.999
+EPSILON = 1e-8
+WEIGHT_DECAY = 0.001
+WEIGHT_INIT = "random"
+NUM_LAYERS = 4
+HIDDEN_SIZE = 128
+ACTIVATION = "sigmoid"
 
 class FFNeuralNetwork():
     def __init__(self, 
@@ -42,7 +53,7 @@ class FFNeuralNetwork():
 
         if self.weight_init == "xavier":
             for i in range(len(self.weights)):
-                self.weights[i] = self.weights[i] / np.sqrt(self.weights[i].shape[0])
+                self.weights[i] = self.weights[i] * np.sqrt(1 / self.weights[i].shape[0])
 
     def initiate_biases(self):
         for _ in range(self.hidden_layers):
@@ -54,8 +65,10 @@ class FFNeuralNetwork():
             return 1 / (1 + np.exp(-x))
         elif self.activation_function == "tanh":
             return np.tanh(x)
-        elif self.activation_function == "ReLU":
-            return np.maximum(1e-20, x)
+        elif self.activation_function == "relu":
+            return np.maximum(0, x)
+        elif self.activation_function == "identity":
+            return x
         else:
             raise Exception("Invalid activation function")
     
@@ -65,8 +78,6 @@ class FFNeuralNetwork():
             max_x = max_x.reshape(max_x.shape[0], 1)
             exp_x = np.exp(x - max_x)
             softmax_mat = exp_x / np.sum(exp_x, axis=1).reshape(exp_x.shape[0], 1)
-            # change 0s to 1e-10
-            softmax_mat[softmax_mat == 0] = 1e-20
             return softmax_mat
         else:
             raise Exception("Invalid output activation function")
@@ -84,9 +95,9 @@ class FFNeuralNetwork():
         return self.post_activation[-1]
 
 def loss(loss, y, y_pred):
-    if loss == "cross_entropy":
+    if loss == "cross_entropy": # Cross Entropy
         return -np.sum(y * np.log(y_pred))
-    elif loss == "mean_squared":
+    elif loss == "mean_squared_error": # Mean Squared Error
         return np.sum((y - y_pred) ** 2) / 2
     else:
         raise Exception("Invalid loss function")
@@ -102,8 +113,8 @@ class Backpropagation():
     def loss_derivative(self, y, y_pred):
         if self.loss == "cross_entropy":
             return -y / y_pred
-        elif self.loss == "mse":
-            return 2 * (y_pred - y)
+        elif self.loss == "mean_squared_error":
+            return (y_pred - y)
         else:
             raise Exception("Invalid loss function")
         
@@ -113,24 +124,29 @@ class Backpropagation():
             return x * (1 - x)
         elif self.activation_function == "tanh":
             return 1 - x ** 2
-        elif self.activation_function == "ReLU":
-            return 1 * (x > 0)
+        elif self.activation_function == "relu":
+            return (x > 0).astype(int)
+        elif self.activation_function == "identity":
+            return np.ones(x.shape)
         else:
             raise Exception("Invalid activation function")
         
     def output_activation_derivative(self, y, y_pred):
-        # x is the post-activation value
         if self.nn.output_activation_function == "softmax":
-            return y_pred - y
+            # derivative of softmax is a matrix
+            return np.diag(y_pred) - np.outer(y_pred, y_pred)
         else:
             raise Exception("Invalid output activation function")
-    
+
     def backward(self, y, y_pred):
         self.d_weights, self.d_biases = [], []
         self.d_h, self.d_a = [], []
 
         self.d_h.append(self.loss_derivative(y, y_pred))
-        self.d_a.append(self.output_activation_derivative(y, y_pred))
+        output_derivative_matrix = []
+        for i in range(y_pred.shape[0]):
+            output_derivative_matrix.append(np.matmul(self.loss_derivative(y[i], y_pred[i]), self.output_activation_derivative(y[i], y_pred[i])))
+        self.d_a.append(np.array(output_derivative_matrix))
 
         for i in range(self.nn.hidden_layers, 0, -1):
             self.d_weights.append(np.matmul(self.nn.post_activation[i].T, self.d_a[-1]))
@@ -143,6 +159,9 @@ class Backpropagation():
 
         self.d_weights.reverse()
         self.d_biases.reverse()
+        for i in range(len(self.d_weights)):
+            self.d_weights[i] = self.d_weights[i] / y.shape[0]
+            self.d_biases[i] = self.d_biases[i] / y.shape[0]
 
         return self.d_weights, self.d_biases
 
@@ -150,17 +169,18 @@ class Optimiser():
     def __init__(self, 
                  nn: FFNeuralNetwork, 
                  bp:Backpropagation, 
-                 lr=0.01, 
+                 lr=0.001, 
                  optimiser="sgd", 
                  momentum=0.9,
                  epsilon=1e-8,
+                 beta=0.9,
                  beta1=0.9,
                  beta2=0.999, 
                  t=0,
                  decay=0):
         
         self.nn, self.bp, self.lr, self.optimiser = nn, bp, lr, optimiser
-        self.momentum, self.epsilon, self.beta1, self.beta2 = momentum, epsilon, beta1, beta2
+        self.momentum, self.epsilon, self.beta1, self.beta2, self.beta = momentum, epsilon, beta1, beta2, beta
         self.h_weights = [np.zeros_like(w) for w in self.nn.weights]
         self.h_biases = [np.zeros_like(b) for b in self.nn.biases]
         self.hm_weights = [np.zeros_like(w) for w in self.nn.weights]
@@ -279,7 +299,7 @@ class Optimiser():
             self.nn.weights[i] -= self.lr * (temp_update_w / ((np.sqrt(self.h_weights_hat)) + self.epsilon)) + self.decay * self.nn.weights[i] * self.lr
             self.nn.biases[i] -= self.lr * (temp_update_b / ((np.sqrt(self.h_biases_hat)) + self.epsilon)) + self.decay * self.nn.biases[i] * self.lr
 
-import wandb
+
 wandb.login()
 wandb.WANDB_NOTEBOOK_NAME = "Assignment1.ipynb"
 
@@ -295,7 +315,7 @@ sweep_configuration = {
             'values': [16, 32, 64, 128]
         },
         'learning_rate': {
-            'values': [0.0001, 0.001, 0.01, 0.1]
+            'values': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1]
         },
         'neurons': {
             'values': [16, 32, 64, 128]
@@ -304,16 +324,16 @@ sweep_configuration = {
             'values': [1, 2, 3, 4]
         },
         'activation': {
-            'values': ['ReLU', 'tanh', 'sigmoid']
+            'values': ['relu', 'tanh', 'sigmoid', 'identity']
         },
         'weight_init': {
-            'values': ['Xavier', 'random']
+            'values': ['xavier', 'random']
         },
         'optimiser': {
             'values': ['sgd', 'momentum', 'nag', 'rmsprop', 'adam', 'nadam']
         },
         'momentum': {
-            'values': [0.8, 0.9]
+            'values': [0.7, 0.8, 0.9]
         },
         'input_size': {
             'value': 784
@@ -340,7 +360,7 @@ sweep_configuration = {
             'value': 1e-8
         },
         'decay': {
-            'values': [0, 0.1, 0.01, 0.001]
+            'values': [0, 0.5, 0.0005]
         }
     }
 }
@@ -362,6 +382,82 @@ def load_data(type):
         # change y to one hot
         y_test = np.eye(10)[y_test]
         return x_test, y_test
+
+# def train(parameters):
+#     x_train, y_train = load_data('train')
+    
+#     nn = FFNeuralNetwork(input_size=parameters['input_size'], 
+#                          hid_layers=parameters['hidden_layers'], 
+#                          neurons=parameters['neurons'], 
+#                          output_size=parameters['output_size'], 
+#                          act_func=parameters['activation'], 
+#                          out_act_func=parameters['output_activation'],
+#                          weight_init=parameters['weight_init'])
+#     bp = Backpropagation(nn=nn, 
+#                          loss=parameters['loss'],
+#                          act_func=parameters['activation'])
+#     opt = Optimiser(nn=nn,
+#                     bp=bp,
+#                     lr=parameters['learning_rate'],
+#                     optimiser=parameters['optimiser'],
+#                     momentum=parameters['momentum'],
+#                     epsilon=parameters['epsilon'],
+#                     beta=parameters['beta'],
+#                     beta1=parameters['beta1'],
+#                     beta2=parameters['beta2'],
+#                     decay=parameters['decay'])
+    
+#     batch_size = parameters['batch_size']
+#     x_train_act, x_val, y_train_act, y_val = train_test_split(x_train, y_train, test_size=0.1)
+
+#     print("Initial Accuracy: {}".format(np.sum(np.argmax(nn.forward(x_train), axis=1) == np.argmax(y_train, axis=1)) / y_train.shape[0]))
+
+#     for epoch in range(parameters['epochs']):
+#         for i in range(0, x_train_act.shape[0], batch_size):
+#             x_batch = x_train_act[i:i+batch_size]
+#             y_batch = y_train_act[i:i+batch_size]
+
+#             y_pred = nn.forward(x_batch)
+#             d_weights, d_biases = bp.backward(y_batch, y_pred)
+#             opt.run(d_weights, d_biases, y_batch, x_batch)
+        
+#         opt.t += 1
+
+#         y_pred = nn.forward(x_train_act)
+#         print("Epoch: {}, Loss: {}".format(epoch + 1, loss(parameters['loss'], y_train_act, y_pred)))
+#         print("Accuracy: {}".format(np.sum(np.argmax(y_pred, axis=1) == np.argmax(y_train_act, axis=1)) / y_train_act.shape[0]))
+
+#         val_accuracy = np.sum(np.argmax(nn.forward(x_val), axis=1) == np.argmax(y_val, axis=1)) / y_val.shape[0]
+#         print("Validation Accuracy: {}".format(val_accuracy))
+
+#     return nn
+
+# parameters = {
+#     'batch_size': 16,
+#     'learning_rate': 0.01,
+#     'neurons': 128,
+#     'hidden_layers': 2,
+#     'activation': 'sigmoid',
+#     'weight_init': 'xavier',
+#     'optimiser': 'momentum',
+#     'momentum': 0.8,
+#     'input_size': 784,
+#     'output_size': 10,
+#     'loss': 'cross_entropy',
+#     'epochs': 10,
+#     'beta1': 0.9,
+#     'beta2': 0.999,
+#     'output_activation': 'softmax',
+#     'epsilon': 1e-8,
+#     'decay': 0.001,
+#     'beta': 0.9
+# }
+
+# nn = train(parameters)
+
+# x_test, y_test = load_data('test')
+# y_pred = nn.forward(x_test)
+# print("Test Accuracy: {}".format(np.sum(np.argmax(y_pred, axis=1) == np.argmax(y_test, axis=1)) / y_test.shape[0]))
 
 def train():
     x_train, y_train = load_data('train')
@@ -407,12 +503,12 @@ def train():
         opt.t += 1
 
         y_pred = nn.forward(x_train_act)
-        print("Epoch: {}, Loss: {}".format(epoch + 1, loss("cross_entropy", y_train_act, y_pred)))
+        print("Epoch: {}, Loss: {}".format(epoch + 1, loss(parameters['loss'], y_train_act, y_pred)))
         print("Accuracy: {}".format(np.sum(np.argmax(y_pred, axis=1) == np.argmax(y_train_act, axis=1)) / y_train_act.shape[0]))
 
-        train_loss = loss("cross_entropy", y_train_act, y_pred)
+        train_loss = loss(parameters['loss'], y_train_act, y_pred)
         train_accuracy = np.sum(np.argmax(y_pred, axis=1) == np.argmax(y_train_act, axis=1)) / y_train_act.shape[0]
-        val_loss = loss("cross_entropy", y_val, nn.forward(x_val))
+        val_loss = loss(parameters['loss'], y_val, nn.forward(x_val))
         val_accuracy = np.sum(np.argmax(nn.forward(x_val), axis=1) == np.argmax(y_val, axis=1)) / y_val.shape[0]
 
         wandb.log({
@@ -425,6 +521,6 @@ def train():
     
     return nn
 
-wandb_id = wandb.sweep(sweep_configuration, project="sweep-hyperparameters-new")
+wandb_id = wandb.sweep(sweep_configuration, project="cs6910-assignment-1")
 
-wandb.agent(wandb_id, function=train, count=500)
+wandb.agent(wandb_id, function=train, count=200)
