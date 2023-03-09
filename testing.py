@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from keras.datasets import fashion_mnist
+from keras.datasets import fashion_mnist, mnist
 import wandb
 
 WANDB_PROJECT = "myprojectname"
@@ -312,13 +312,13 @@ sweep_configuration = {
     },
     'parameters': {
         'batch_size': {
-            'values': [16, 32, 64, 128]
+            'values': [16, 32, 64, 128, 256]
         },
         'learning_rate': {
             'values': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1]
         },
         'neurons': {
-            'values': [16, 32, 64, 128]
+            'values': [16, 32, 64, 128, 256]
         },
         'hidden_layers': {
             'values': [1, 2, 3, 4]
@@ -366,7 +366,7 @@ sweep_configuration = {
 }
 
 def load_data(type):
-    (x, y), (x_test, y_test) = fashion_mnist.load_data()
+    (x, y), (x_test, y_test) = mnist.load_data()
 
     if type == 'train':
         x = x.reshape(x.shape[0], 784)
@@ -523,4 +523,4 @@ def train():
 
 wandb_id = wandb.sweep(sweep_configuration, project="cs6910-assignment-1")
 
-wandb.agent(wandb_id, function=train, count=200)
+wandb.agent(wandb_id, function=train, count=100)
