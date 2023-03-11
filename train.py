@@ -418,9 +418,9 @@ for epoch in range(parameters_dict['epochs']):
 
     y_pred = nn.forward(x_train_act)
 
-    train_loss = loss("cross_entropy", y_train_act, y_pred)
+    train_loss = loss(parameters_dict["loss"], y_train_act, y_pred)
     train_accuracy = np.sum(np.argmax(y_pred, axis=1) == np.argmax(y_train_act, axis=1)) / y_train_act.shape[0]
-    val_loss = loss("cross_entropy", y_val, nn.forward(x_val))
+    val_loss = loss(parameters_dict["loss"], y_val, nn.forward(x_val))
     val_accuracy = np.sum(np.argmax(nn.forward(x_val), axis=1) == np.argmax(y_val, axis=1)) / y_val.shape[0]
 
     print("Epoch: {}".format(epoch + 1))
@@ -435,7 +435,7 @@ for epoch in range(parameters_dict['epochs']):
     })
 
 y_pred_test = nn.forward(x_test)
-test_loss = loss("cross_entropy", y_test, y_pred_test)
+test_loss = loss(parameters_dict["loss"], y_test, y_pred_test)
 test_accuracy = np.sum(np.argmax(y_pred_test, axis=1) == np.argmax(y_test, axis=1)) / y_test.shape[0]
 
 print("Test Accuracy: {}".format(test_accuracy))

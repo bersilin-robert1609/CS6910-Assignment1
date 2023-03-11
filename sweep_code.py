@@ -411,6 +411,8 @@ def train_sweep():
     
     return nn
 
-wandb_id = wandb.sweep(sweep_configuration, project="cs6910-assignment-1")
+wandb_id = wandb.sweep(sweep_configuration, project="CUSTOM_SWEEP")
 
-wandb.agent(wandb_id, function=train_sweep, count=500)
+wandb.agent(wandb_id, function=train_sweep, count=20)
+
+wandb.finish()
