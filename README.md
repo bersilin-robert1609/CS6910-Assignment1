@@ -34,6 +34,7 @@ The dataset used is Fashion MNIST. The dataset is available in the keras.dataset
 - Numpy 1.19.5
 - Keras 2.4.3 (for the dataset)
 - Wandb 0.10.30
+- Sklearn 0.24.1 (for the confusion matrix and test-train split)
 
 ## Usage
 
