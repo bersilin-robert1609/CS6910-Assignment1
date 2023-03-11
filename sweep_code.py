@@ -4,89 +4,11 @@ CS6910: Assignment 1
 '''
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
 import numpy as np
 from sklearn.model_selection import train_test_split
 from keras.datasets import fashion_mnist, mnist
 import wandb
-import argparse
 
-# Class names for the Fashion MNIST dataset
-CLASS_NAMES = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
-
-# Settings for the run
-WANDB_PROJECT = "myprojectname"
-WANDB_ENTITY = "myname"
-DATASET = "fashion_mnist"
-EPOCHS = 10
-BATCH_SIZE = 64
-LOSS = "cross_entropy"
-OPTIMIZER = "nadam"
-LEARNING_RATE = 0.005
-MOMENTUM = 0.8
-BETA = 0.9
-BETA1 = 0.9
-BETA2 = 0.999
-EPSILON = 1e-8
-WEIGHT_DECAY = 0.0005
-WEIGHT_INIT = "xavier"
-NUM_LAYERS = 1
-HIDDEN_SIZE = 256
-ACTIVATION = "sigmoid"
-INPUT_SIZE = 784
-OUTPUT_SIZE = 10
-
-parameters_dict = {
-    "wandb_project": WANDB_PROJECT,
-    "wandb_entity": WANDB_ENTITY,
-    "dataset": DATASET,
-    "epochs": EPOCHS,
-    "batch_size": BATCH_SIZE,
-    "loss": LOSS,
-    "optimizer": OPTIMIZER,
-    "learning_rate": LEARNING_RATE,
-    "momentum": MOMENTUM,
-    "beta": BETA,
-    "beta1": BETA1,
-    "beta2": BETA2,
-    "epsilon": EPSILON,
-    "weight_decay": WEIGHT_DECAY,
-    "weight_init": WEIGHT_INIT,
-    "num_layers": NUM_LAYERS,
-    "hidden_size": HIDDEN_SIZE,
-    "activation": ACTIVATION
-}
-
-# Parse arguments and update parameters_dict
-parser = argparse.ArgumentParser()
-parser.add_argument("-wp", "--wandb_project", type=str, default=WANDB_PROJECT, help="Wandb project name", required=True)
-parser.add_argument("-we", "--wandb_entity", type=str, default=WANDB_ENTITY, help="Wandb entity name", required=True)
-parser.add_argument("-d", "--dataset", type=str, default=DATASET, help="Dataset to use choices=['fashion_mnist', 'mnist']")
-parser.add_argument("-e", "--epochs", type=int, default=EPOCHS, help="Number of epochs")
-parser.add_argument("-b", "--batch_size", type=int, default=BATCH_SIZE, help="Batch size")
-parser.add_argument("-l", "--loss", type=str, default=LOSS, help="Loss function to use choices=['cross_entropy', 'mean_squared_error']")
-parser.add_argument("-o", "--optimizer", type=str, default=OPTIMIZER, help="Optimizer to use choices=['sgd', 'momentum', 'nag', 'rmsprop', 'adam', 'nadam']")
-parser.add_argument("-lr", "--learning_rate", type=float, default=LEARNING_RATE, help="Learning rate")
-parser.add_argument("-m", "--momentum", type=float, default=MOMENTUM, help="Momentum for Momentum and NAG")
-parser.add_argument("-beta", "--beta", type=float, default=BETA, help="Beta for RMSProp")
-parser.add_argument("-beta1", "--beta1", type=float, default=BETA1, help="Beta1 for Adam and Nadam")
-parser.add_argument("-beta2", "--beta2", type=float, default=BETA2, help="Beta2 for Adam and Nadam")
-parser.add_argument("-eps", "--epsilon", type=float, default=EPSILON, help="Epsilon for Adam and Nadam")
-parser.add_argument("-w_d", "--weight_decay", type=float, default=WEIGHT_DECAY, help="Weight decay")
-parser.add_argument("-w_i", "--weight_init", type=str, default=WEIGHT_INIT, help="Weight initialization choices=['random', 'xavier']")
-parser.add_argument("-nhl", "--num_layers", type=int, default=NUM_LAYERS, help="Number of hidden layers")
-parser.add_argument("-sz", "--hidden_size", type=int, default=HIDDEN_SIZE, help="Hidden size")
-parser.add_argument("-a", "--activation", type=str, default=ACTIVATION, help="Activation function choices=['sigmoid', 'tanh', 'relu']")
-
-args = parser.parse_args()
-parameters_dict.update(vars(args))
-
-# Print the parameters
-print("Parameters:")
-for key, value in parameters_dict.items():
-    print(f"{key}: {value}")
-
-# Feedforward neural network
 class FFNeuralNetwork():
     def __init__(self, 
                 neurons=128, 
@@ -156,8 +78,7 @@ class FFNeuralNetwork():
         self.post_activation.append(self.output_activation(self.pre_activation[-1]))
 
         return self.post_activation[-1]
-    
-# Loss functions
+
 def loss(loss, y, y_pred):
     if loss == "cross_entropy": # Cross Entropy
         return -np.sum(y * np.log(y_pred))
@@ -165,8 +86,7 @@ def loss(loss, y, y_pred):
         return np.sum((y - y_pred) ** 2) / 2
     else:
         raise Exception("Invalid loss function")
-    
-# Backpropagation
+
 class Backpropagation():
     def __init__(self, 
                  nn: FFNeuralNetwork, 
@@ -229,8 +149,7 @@ class Backpropagation():
             self.d_biases[i] = self.d_biases[i] / y.shape[0]
 
         return self.d_weights, self.d_biases
-    
-# Optimizers
+
 class Optimizer():
     def __init__(self, 
                  nn: FFNeuralNetwork, 
@@ -336,8 +255,76 @@ class Optimizer():
             self.nn.weights[i] -= self.lr * (temp_update_w / ((np.sqrt(self.h_weights_hat)) + self.epsilon)) + self.decay * self.nn.weights[i] * self.lr
             self.nn.biases[i] -= self.lr * (temp_update_b / ((np.sqrt(self.h_biases_hat)) + self.epsilon)) + self.decay * self.nn.biases[i] * self.lr
 
-# data loader function
-def load_data(type, dataset=DATASET):
+
+wandb.login()
+
+sweep_configuration = {
+    'method': 'random',
+    'name': 'sweep',
+    'metric': {
+        'goal': 'maximize',
+        'name': 'val_accuracy'
+    },
+    'parameters': {
+        'batch_size': {
+            'values': [16, 32, 64, 128, 256]
+        },
+        'learning_rate': {
+            'values': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1]
+        },
+        'neurons': {
+            'values': [16, 32, 64, 128, 256]
+        },
+        'hidden_layers': {
+            'values': [1, 2, 3, 4]
+        },
+        'activation': {
+            'values': ['relu', 'tanh', 'sigmoid', 'identity']
+        },
+        'weight_init': {
+            'values': ['xavier', 'random']
+        },
+        'optimizer': {
+            'values': ['sgd', 'momentum', 'nag', 'rmsprop', 'adam', 'nadam']
+        },
+        'momentum': {
+            'values': [0.7, 0.8, 0.9]
+        },
+        'input_size': {
+            'value': 784
+        },
+        'output_size': {
+            'value': 10
+        },
+        'loss': {
+            'value': 'cross_entropy'
+        },
+        'epochs': {
+            'value': 10
+        },
+        'beta1': {
+            'value': 0.9
+        },
+        'beta2': {
+            'value': 0.999
+        },
+        'output_activation': {
+            'value': 'softmax'
+        },
+        'epsilon': {
+            'value': 1e-8
+        },
+        'decay': {
+            'values': [0, 0.5, 0.0005]
+        },
+        'dataset': {
+            'value': 'fashion_mnist'
+        }
+    }
+}
+
+def load_data(type, dataset='fashion_mnist'):
+
     x, y, x_test, y_test = None, None, None, None
     
     if dataset == 'mnist':
@@ -346,97 +333,75 @@ def load_data(type, dataset=DATASET):
         (x, y), (x_test, y_test) = fashion_mnist.load_data()
 
     if type == 'train':
-        x_train = x.reshape(x.shape[0], 784) / 255
-        y_train = np.eye(10)[y]
-        return x_train, y_train
+        x = x.reshape(x.shape[0], 784) / 255
+        y = np.eye(10)[y]
+        return x, y
     elif type == 'test':
         x_test = x_test.reshape(x_test.shape[0], 784) / 255
         y_test = np.eye(10)[y_test]
         return x_test, y_test
 
-# Initialize wandb
-run = wandb.init(project=parameters_dict["wandb_project"], entity=parameters_dict["wandb_entity"], config=parameters_dict)
+def train_sweep():
+    run = wandb.init()
+    parameters = wandb.config
+    run.name = f"{parameters['activation']}_neurons={parameters['neurons']}_layers={parameters['hidden_layers']}_lr={parameters['learning_rate']}_batch={parameters['batch_size']}_opt={parameters['optimizer']}_mom={parameters['momentum']}_init={parameters['weight_init']}"
+    x_train, y_train = load_data('train', dataset=parameters['dataset'])
+    
+    nn = FFNeuralNetwork(input_size=parameters['input_size'], 
+                         hid_layers=parameters['hidden_layers'], 
+                         neurons=parameters['neurons'], 
+                         output_size=parameters['output_size'], 
+                         act_func=parameters['activation'], 
+                         out_act_func=parameters['output_activation'],
+                         weight_init=parameters['weight_init'])
+    bp = Backpropagation(nn=nn, 
+                         loss=parameters['loss'],
+                         act_func=parameters['activation'])
+    opt = Optimizer(nn=nn,
+                    bp=bp,
+                    lr=parameters['learning_rate'],
+                    optimizer=parameters['optimizer'],
+                    momentum=parameters['momentum'],
+                    epsilon=parameters['epsilon'],
+                    beta1=parameters['beta1'],
+                    beta2=parameters['beta2'],
+                    decay=parameters['decay'])
+    
+    batch_size = parameters['batch_size']
+    x_train_act, x_val, y_train_act, y_val = train_test_split(x_train, y_train, test_size=0.1, random_state=42)
 
-# Set name for the run ends with a random number
-run.name = f"opt_{parameters_dict['optimizer']}_lr_{parameters_dict['learning_rate']}_act_{parameters_dict['activation']}_hid_{parameters_dict['num_layers']}_nrns_{parameters_dict['hidden_size']}_randn_" + str(np.random.randint(1000))
+    print("Initial Accuracy: {}".format(np.sum(np.argmax(nn.forward(x_train), axis=1) == np.argmax(y_train, axis=1)) / y_train.shape[0]))
 
-# Initialize the neural network
-nn = FFNeuralNetwork(neurons=parameters_dict['hidden_size'],
-                     hid_layers=parameters_dict['num_layers'],
-                     input_size=INPUT_SIZE,
-                     output_size=OUTPUT_SIZE,
-                     act_func=parameters_dict['activation'],
-                     weight_init=parameters_dict['weight_init'],
-                     out_act_func="softmax",
-                     init_toggle=True)
+    for epoch in range(parameters['epochs']):
+        for i in range(0, x_train_act.shape[0], batch_size):
+            x_batch = x_train_act[i:i+batch_size]
+            y_batch = y_train_act[i:i+batch_size]
 
-# Initialize the Backpropagation algorithm
-bp = Backpropagation(nn=nn,
-                     loss=parameters_dict['loss'],
-                     act_func=parameters_dict['activation'])
+            y_pred = nn.forward(x_batch)
+            d_weights, d_biases = bp.backward(y_batch, y_pred)
+            opt.run(d_weights, d_biases)
+        
+        opt.t += 1
 
-# Initialize the optimizer
-opt = Optimizer(nn=nn,
-                bp=bp,
-                lr=parameters_dict['learning_rate'],
-                optimizer=parameters_dict['optimizer'],
-                momentum=parameters_dict['momentum'],
-                beta=parameters_dict['beta'],
-                beta1=parameters_dict['beta1'],
-                beta2=parameters_dict['beta2'],
-                epsilon=parameters_dict['epsilon'],
-                t=0,
-                decay=parameters_dict['weight_decay'])
+        y_pred = nn.forward(x_train_act)
+        print("Epoch: {}, Loss: {}".format(epoch + 1, loss(parameters['loss'], y_train_act, y_pred)))
+        print("Accuracy: {}".format(np.sum(np.argmax(y_pred, axis=1) == np.argmax(y_train_act, axis=1)) / y_train_act.shape[0]))
 
-# Load the data
-x_train, y_train = load_data(type='train', dataset=parameters_dict['dataset'])
-x_test, y_test = load_data(type='test', dataset=parameters_dict['dataset'])
+        train_loss = loss(parameters['loss'], y_train_act, y_pred)
+        train_accuracy = np.sum(np.argmax(y_pred, axis=1) == np.argmax(y_train_act, axis=1)) / y_train_act.shape[0]
+        val_loss = loss(parameters['loss'], y_val, nn.forward(x_val))
+        val_accuracy = np.sum(np.argmax(nn.forward(x_val), axis=1) == np.argmax(y_val, axis=1)) / y_val.shape[0]
 
-x_train_act, x_val, y_train_act, y_val = train_test_split(x_train, y_train, test_size=0.1)
+        wandb.log({
+            "epoch": epoch + 1,
+            "train_loss": train_loss,
+            "train_accuracy": train_accuracy,
+            "val_loss": val_loss,
+            "val_accuracy": val_accuracy
+        })
+    
+    return nn
 
-# Initialize the training loop
-for epoch in range(parameters_dict['epochs']):
-    for i in range(0, x_train_act.shape[0], parameters_dict['batch_size']):
-        x_batch = x_train_act[i:i + parameters_dict['batch_size']]
-        y_batch = y_train_act[i:i + parameters_dict['batch_size']]
+wandb_id = wandb.sweep(sweep_configuration, project="cs6910-assignment-1")
 
-        # Forward pass
-        y_pred = nn.forward(x_batch)
-
-        # Backward pass
-        d_weights, d_biases = bp.backward(y_batch, y_pred)
-
-        # Update weights and biases
-        opt.run(d_weights, d_biases)
-
-    opt.t += 1
-
-    y_pred = nn.forward(x_train_act)
-
-    train_loss = loss("cross_entropy", y_train_act, y_pred)
-    train_accuracy = np.sum(np.argmax(y_pred, axis=1) == np.argmax(y_train_act, axis=1)) / y_train_act.shape[0]
-    val_loss = loss("cross_entropy", y_val, nn.forward(x_val))
-    val_accuracy = np.sum(np.argmax(nn.forward(x_val), axis=1) == np.argmax(y_val, axis=1)) / y_val.shape[0]
-
-    print("Epoch: {}".format(epoch + 1))
-    print("Train Accuracy: {}".format(train_accuracy))
-    print("Validation Accuracy: {}".format(val_accuracy))
-    wandb.log({
-        "epoch": epoch + 1,
-        "train_loss": train_loss,
-        "train_accuracy": train_accuracy,
-        "val_loss": val_loss,
-        "val_accuracy": val_accuracy
-    })
-
-y_pred_test = nn.forward(x_test)
-test_loss = loss("cross_entropy", y_test, y_pred_test)
-test_accuracy = np.sum(np.argmax(y_pred_test, axis=1) == np.argmax(y_test, axis=1)) / y_test.shape[0]
-
-print("Test Accuracy: {}".format(test_accuracy))
-
-wandb.log({
-    "test_loss": test_loss,
-    "test_accuracy": test_accuracy
-})
-wandb.finish()
+wandb.agent(wandb_id, function=train_sweep, count=500)
