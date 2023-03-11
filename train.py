@@ -17,6 +17,8 @@ CLASS_NAMES = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 
 # Settings for the run
 WANDB_PROJECT = "myprojectname"
 WANDB_ENTITY = "myname"
+
+# The below are my best parameters for the Fashion MNIST dataset
 DATASET = "fashion_mnist"
 EPOCHS = 10
 BATCH_SIZE = 64
@@ -117,6 +119,9 @@ class FFNeuralNetwork():
         if self.weight_init == "xavier":
             for i in range(len(self.weights)):
                 self.weights[i] = self.weights[i] * np.sqrt(1 / self.weights[i].shape[0])
+        
+        if(self.weight_init != "random" and self.weight_init != "xavier"):
+            raise Exception("Invalid weight initialization method")
 
     def initiate_biases(self):
         for _ in range(self.hidden_layers):
@@ -293,8 +298,8 @@ class Optimizer():
 
     def RMSProp(self, d_weights, d_biases):
         for i in range(self.nn.hidden_layers + 1):
-            self.h_weights[i] = self.momentum * self.h_weights[i] + (1 - self.momentum) * d_weights[i]**2
-            self.h_biases[i] = self.momentum * self.h_biases[i] + (1 - self.momentum) * d_biases[i]**2
+            self.h_weights[i] = self.beta * self.h_weights[i] + (1 - self.beta) * d_weights[i]**2
+            self.h_biases[i] = self.beta * self.h_biases[i] + (1 - self.beta) * d_biases[i]**2
 
             self.nn.weights[i] -= (self.lr / (np.sqrt(self.h_weights[i]) + self.epsilon)) * d_weights[i] + self.decay * self.nn.weights[i] * self.lr
             self.nn.biases[i] -= (self.lr / (np.sqrt(self.h_biases[i]) + self.epsilon)) * d_biases[i] + self.decay * self.nn.biases[i] * self.lr

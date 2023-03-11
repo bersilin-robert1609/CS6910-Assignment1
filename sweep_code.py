@@ -400,6 +400,15 @@ def train_sweep():
             "val_accuracy": val_accuracy
         })
     
+    x_test, y_test = load_data('test', dataset=parameters['dataset'])
+    test_loss = loss(parameters['loss'], y_test, nn.forward(x_test))
+    test_accuracy = np.sum(np.argmax(nn.forward(x_test), axis=1) == np.argmax(y_test, axis=1)) / y_test.shape[0]
+    print("Test Accuracy: {}".format(test_accuracy))
+    wandb.log({
+        "test_loss": test_loss,
+        "test_accuracy": test_accuracy
+    })
+    
     return nn
 
 wandb_id = wandb.sweep(sweep_configuration, project="cs6910-assignment-1")
